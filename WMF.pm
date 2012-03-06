@@ -12,7 +12,7 @@ use Image::WMF::Rectangle;
 use Image::WMF::Polygon;
 use Image::WMF::Image;
 use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
-$VERSION = "1.01";
+$VERSION = "1.02";
 
 @ISA = qw(Exporter);
 # Items to export into callers namespace by default. Note: do not export
@@ -36,19 +36,19 @@ $VERSION = "1.01";
 sub new {
 	my ($class,$x,$y,$resolution) = @_;
 
-	# A twip (meaning "twentieth of a point") is the logical unit of measurement 
+	# A twip (meaning "twentieth of a point") is the logical unit of measurement
 	# used in Windows Metafiles. A twip is equal to 1/1440 of an inch. Thus 720 twips
-	# equal 1/2 inch, while 32,768 twips is 22.75 inches. 
-	# The metafile header contains the number of twips per inch used to represent the 
-	# image. Normally, there are 1440 twips per inch; however, this number may be changed 
-	# to scale the image. 
+	# equal 1/2 inch, while 32,768 twips is 22.75 inches.
+	# The metafile header contains the number of twips per inch used to represent the
+	# image. Normally, there are 1440 twips per inch; however, this number may be changed
+	# to scale the image.
 	# A value of 720 indicates that the image is double its normal size, or scaled
 	# to a factor of 2:1. A value of 360 indicates a scale of 4:1, while a value of 2880
-	# indicates that the image is scaled down in size by a factor of two. A value of 1440 
-	# indicates a 1:1 scale ratio. 	
+	# indicates that the image is scaled down in size by a factor of two. A value of 1440
+	# indicates a 1:1 scale ratio.
 
 	unless (defined $resolution){
-		#$resolution = 1440; 	# Default WMF resolution for 1:1 scaling 
+		#$resolution = 1440; 	# Default WMF resolution for 1:1 scaling
 		$resolution = 96; 		# ~72dpi
 	}
 	$y *= 4;
@@ -78,13 +78,13 @@ sub _initialise {
 	$self->{'_wmf'} = new Image::WMF::Image();
 	$self->{'_wmf'}->setROP2($R2_COPYPEN);
 	$self->{'_wmf'}->setWindowExt($x,$y);
-	$self->{'_wmf'}->setMapMode($MM_TEXT);
+	$self->{'_wmf'}->setMapMode($MM_ANISOTROPIC);
 	$self->{'_wmf'}->setWindowOrg(0,0);
 }
 
 sub string {
 	my ($self,$font,$x,$y,$string,$c) = @_;
-	# we have been passed a font object so 
+	# we have been passed a font object so
 	# need to make a GDI object and handle from it
 	if ($font->isa("Image::WMF::Font")){
 		my $hFont = $self->{'_wmf'}->createFontIndirect(
@@ -117,7 +117,7 @@ sub string {
 
 sub filledString {
 	my ($self,$font,$x,$y,$string,$c,$c2) = @_;
-	# we have been passed a font object so 
+	# we have been passed a font object so
 	# need to make a GDI object and handle from it
 	if ($font->isa("Font")){
 		my $hFont = $self->{'_wmf'}->createFontIndirect(
@@ -139,8 +139,8 @@ sub filledString {
 		$self->{'_wmf'}->setTextColour($c);
 		$self->{'_wmf'}->setBKColour($c2);
 		$self->{'_wmf'}->setBKMode($OPAQUE);
-		my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c2,0);	
-		$self->{'_wmf'}->selectObject($hBrush);	
+		my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c2,0);
+		$self->{'_wmf'}->selectObject($hBrush);
 		$self->{'_wmf'}->setTextAlign($TA_TOP);
 		$self->{'_wmf'}->selectObject($hFont);
 		$self->{'_wmf'}->textOut($x,$y,$string);
@@ -214,8 +214,8 @@ sub getBounds {
 
 sub fill {
 	my ($self,$x,$y,$c) = @_;
-	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);	
-	$self->{'_wmf'}->selectObject($hBrush);	
+	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);
+	$self->{'_wmf'}->selectObject($hBrush);
 	$self->{'_wmf'}->floodFill($x, $y, $c);
 	$self->{'_wmf'}->deleteObject($hBrush);
 	return(1);
@@ -227,8 +227,8 @@ sub fillToBorder {
 	# The GDI funtion number for extFloodFill seems to have problems
 	# Although published, it is not supported on NT4.
 	return(1);
-	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);	
-	$self->{'_wmf'}->selectObject($hBrush);	
+	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);
+	$self->{'_wmf'}->selectObject($hBrush);
 	$self->{'_wmf'}->extFloodFill($x, $y, $c,$FLOODFILLSURFACE);
 	$self->{'_wmf'}->deleteObject($hBrush);
 	return(1);
@@ -236,10 +236,10 @@ sub fillToBorder {
 
 sub polygon {
     my ($self,$poly,$c) = @_;
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_HOLLOW,$c,0);	
-	$self->{'_wmf'}->selectObject($hBrush);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_HOLLOW,$c,0);
+	$self->{'_wmf'}->selectObject($hBrush);
 	my $x_vertices = $poly->_xvertices();
 	my $y_vertices = $poly->_yvertices();
 	if ($poly->length() >= 3){
@@ -254,10 +254,10 @@ sub polygon {
 
 sub filledPolygon {
     my ($self,$poly,$c) = @_;
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);	
-	$self->{'_wmf'}->selectObject($hBrush);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);
+	$self->{'_wmf'}->selectObject($hBrush);
 	my $x_vertices = $poly->_xvertices();
 	my $y_vertices = $poly->_yvertices();
 	if ($poly->length() >= 3){
@@ -272,38 +272,38 @@ sub filledPolygon {
 
 sub line {
     my ($self,$x1,$y1,$x2,$y2,$c) = @_;
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	$self->{'_wmf'}->moveTo($x1,$y1);	
-	$self->{'_wmf'}->lineTo($x2,$y2);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	$self->{'_wmf'}->moveTo($x1,$y1);
+	$self->{'_wmf'}->lineTo($x2,$y2);
 	$self->{'_wmf'}->deleteObject($hPen);
 	return(1);
 }
 
 sub dashedLine {
     my ($self,$x1,$y1,$x2,$y2,$c) = @_;
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_DOT,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	$self->{'_wmf'}->moveTo($x1,$y1);	
-	$self->{'_wmf'}->lineTo($x2,$y2);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_DOT,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	$self->{'_wmf'}->moveTo($x1,$y1);
+	$self->{'_wmf'}->lineTo($x2,$y2);
 	$self->{'_wmf'}->deleteObject($hPen);
 	return(1);
 }
 
 sub setPixel {
     my ($self,$x,$y,$c) = @_;
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	$self->{'_wmf'}->setPixel($x,$y,$c);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	$self->{'_wmf'}->setPixel($x,$y,$c);
 	$self->{'_wmf'}->deleteObject($hPen);
 	return(1);
 }
 
 sub arc {
     my ($self,$x,$y,$x2,$y2,$ax1,$ay1,$ax2,$ay2,$c) = @_;
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	$self->{'_wmf'}->arc($x,$y,$x2,$y2,$ax1,$ay1,$ax2,$ay2,$c);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	$self->{'_wmf'}->arc($x,$y,$x2,$y2,$ax1,$ay1,$ax2,$ay2,$c);
 	$self->{'_wmf'}->deleteObject($hPen);
 	return(1);
 }
@@ -317,11 +317,11 @@ sub rectangle {
 	if ($y2 - $y1 < 2){
 		$y2 += 1;
 	}
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_HOLLOW,$c,0);	
-	$self->{'_wmf'}->selectObject($hBrush);	
-	$self->{'_wmf'}->rectangle($x1,$y1,$x2,$y2);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_HOLLOW,$c,0);
+	$self->{'_wmf'}->selectObject($hBrush);
+	$self->{'_wmf'}->rectangle($x1,$y1,$x2,$y2);
 	$self->{'_wmf'}->deleteObject($hPen);
 	$self->{'_wmf'}->deleteObject($hBrush);
 	return(1);
@@ -336,17 +336,17 @@ sub filledRectangle {
 	if ($y2 - $y1 < 2){
 		$y2 += 1;
 	}
-	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);	
-	$self->{'_wmf'}->selectObject($hPen);	
-	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);	
+	my $hPen = $self->{'_wmf'}->createPenIndirect($PS_SOLID,0,$c);
+	$self->{'_wmf'}->selectObject($hPen);
+	my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_SOLID,$c,0);
 	#my $hBrush = $self->{'_wmf'}->createBrushIndirect($BS_HOLLOW,$c,0);	# DEBUG ONLY
-	$self->{'_wmf'}->selectObject($hBrush);	
-	$self->{'_wmf'}->rectangle($x1,$y1,$x2,$y2);	
+	$self->{'_wmf'}->selectObject($hBrush);
+	$self->{'_wmf'}->rectangle($x1,$y1,$x2,$y2);
 	$self->{'_wmf'}->deleteObject($hPen);
 	$self->{'_wmf'}->deleteObject($hBrush);
 	return(1);
 }
-	
+
 sub colorAllocate {
     my ($self,$r,$g,$b) = @_;
 	my $colour = new Image::WMF::Colour($r,$g,$b);
@@ -399,10 +399,10 @@ Image::WMF - Perl extension for creating Windows Metafile images on UNIX.
 
   $wmfdata = $im->wmf;
 
-  open(OUT, ">test.wmf") or warn "Can't create WMF file: !$\n";
+  open(OUT, ">test.wmf") or warn "Can't create WMF file: $!\n";
   print OUT $wmfdata;
   close(OUT);
-  
+
 =head1 DESCRIPTION
 
 This module is designed to provide the same interface to creating
@@ -425,4 +425,3 @@ Tony Cox, E<lt>avc@sanger.ac.ukE<gt>
 GD.pm
 
 =cut
-

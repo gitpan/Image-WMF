@@ -1,5 +1,8 @@
 ChangeLog for Image::WMF
 
-16.12.2002
-Version 1.01:    Initial release.
+16.12.2002 - Version 1.01:
+Initial release.
 
+4.3.2012 - Version 1.02:
+Converted default image type to MM_ANISOTROPIC (so image rescaling works correctly)
+Rewrote tests using Test::Simple
