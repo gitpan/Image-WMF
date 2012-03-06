@@ -14,7 +14,7 @@ ok(1); # If we made it this far, we're ok.
 my $im = new Image::WMF(300,100);
 my $red = $im->colorAllocate(255,0,0);
 my $blue = $im->colorAllocate(0,0,255);
-my $green = $im->colorAllocate(0,255,0);
+my $green = $im->colorExact(0,255,0);
 $im->filledRectangle(20,20,50,50,$red);
 my $p = new Image::WMF::Polygon();
 $p->addPt(10,20);

@@ -12,7 +12,7 @@ use Image::WMF::Rectangle;
 use Image::WMF::Polygon;
 use Image::WMF::Image;
 use vars qw($VERSION @ISA @EXPORT $AUTOLOAD);
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 @ISA = qw(Exporter);
 # Items to export into callers namespace by default. Note: do not export
@@ -352,6 +352,11 @@ sub colorAllocate {
 	my $colour = new Image::WMF::Colour($r,$g,$b);
 	$self->{'_ncolours'}++;
 	return($colour);
+}
+
+sub colorExact {
+    my ($self,$r,$g,$b) = @_;
+	return($self->colorAllocate($r,$g,$b));
 }
 
 sub colorDeallocate {
